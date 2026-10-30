@@ -26,11 +26,9 @@ var app = builder.Build();
 // 3. CONFIGURAÇÃO DO FLUXO (PIPELINE)
 // ============================================================
 // Ativa o Swagger (página de testes) quando estivermos programando
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+// Força o Swagger a funcionar em qualquer ambiente
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
 
