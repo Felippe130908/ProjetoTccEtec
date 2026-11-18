@@ -1,38 +1,44 @@
 using Microsoft.EntityFrameworkCore;
-using GestaoIgreja.Data; // Importa a pasta onde está o AppDbContext
+using GestaoIgreja.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // ============================================================
 // 1. CONFIGURAÇÃO DO BANCO DE DADOS (MySQL)
 // ============================================================
-// Vai lá no appsettings.json e pega a senha e o nome do banco
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
-// Avisa ao C# para usar o AppDbContext com o MySQL
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
 
 // ============================================================
-// 2. CONFIGURAÇÃO DOS SERVIÇOS DA API
+// 2. CONFIGURAÇÃO DOS SERVIÇOS DA API E CORS
 // ============================================================
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("PermitirFrontEnd", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(); // Gera a interface visual para testarmos a API
+builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
 // ============================================================
 // 3. CONFIGURAÇÃO DO FLUXO (PIPELINE)
 // ============================================================
-// Ativa o Swagger (página de testes) quando estivermos programando
-// Força o Swagger a funcionar em qualquer ambiente
 app.UseSwagger();
 app.UseSwaggerUI();
 
-app.UseHttpsRedirection();
+// Ativa o CORS antes da autorização e das rotas
+app.UseCors("PermitirFrontEnd");
 
-// app.UseAuthentication(); // Descomentaremos isso quando fizermos o Login
 app.UseAuthorization();
 
 app.MapControllers();

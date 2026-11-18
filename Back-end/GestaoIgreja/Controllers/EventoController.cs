@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using GestaoIgreja.Data;
 using GestaoIgreja.Models;
 using GestaoIgreja.DTOs;
@@ -16,6 +17,7 @@ namespace GestaoIgreja.Controllers
             _context = context;
         }
 
+        // Rota POST: /api/Evento
         [HttpPost]
         public async Task<IActionResult> RegistrarEvento([FromBody] EventoRequestDto dto)
         {
@@ -31,6 +33,18 @@ namespace GestaoIgreja.Controllers
             await _context.SaveChangesAsync();
 
             return Ok(new { mensagem = "Evento registrado com sucesso!" });
+        }
+
+        // Rota GET: /api/Evento/igreja/1
+        [HttpGet("igreja/{idIgreja}")]
+        public async Task<IActionResult> ObterEventosPorIgreja(int idIgreja)
+        {
+            var eventos = await _context.Eventos
+                .Where(e => e.IdIgreja == idIgreja)
+                .OrderBy(e => e.DataHora)
+                .ToListAsync();
+
+            return Ok(eventos);
         }
     }
 }
